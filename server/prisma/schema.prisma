@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Department {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String   @unique
+  doctors String[]
+  rooms   Room[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Room {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  department   Department @relation(fields: [departmentID], references: [id])
+  departmentID String     @db.ObjectId
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Schedule {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  day       DateTime @unique
+  schedules Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Appointment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientID String
+  doctorID  String
+  roomID    String
+  day       DateTime
+  time      String
+  queueNo   Int
+  payment   Boolean  @default(false)
+  status    String   @default("pending") // PENDING, COMPLETED, CANCELLED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Medicine {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  ipfs     String
+  // name           String
+  // image          String
+  // brand          String
+  // from           String
+  // description    String
+  // manufacturDate String
+  // expiryDate     String
+  price    Int
+  quantity Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Medication Medication[]
+}
+
+model Medication {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  medicine   Medicine @relation(fields: [medicineID], references: [id])
+  medicineID String   @db.ObjectId
+  dosage     String
+  frequency  String
+  duration   String
+  quantity   Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
